@@ -1,7 +1,7 @@
 <template>
   <td
+    :class="playerClasses"
     @click="handleClick"
-    :class="palyerClasses"
   >
     {{ mark }}
   </td>
@@ -28,7 +28,15 @@ export default {
       }
       return ''
     },
-
+    playerClasses() {
+      if (this.state === 1) {
+        return 'circle'
+      }
+      if (this.state === -1) {
+        return 'cross'
+      }
+      return ''
+    }
   },
   methods: {
     handleClick() {
@@ -38,4 +46,11 @@ export default {
 }
 </script>
 
-<style></style>
+<style>
+.circle {
+  color: #f00;
+}
+.cross {
+  color: #00f;
+}
+</style>
