@@ -45,12 +45,3 @@ export default {
   }
 }
 </script>
-
-<style>
-.circle {
-  color: #f00;
-}
-.cross {
-  color: #00f;
-}
-</style>

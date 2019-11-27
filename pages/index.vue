@@ -1,5 +1,12 @@
 <template>
-  <div class="container">
+  <div class="game__container">
+    <div
+      v-if="isOver"
+      class="game__result"
+      :class="resultClasses"
+    >
+      {{ result }}
+    </div>
     <table frame="void">
       <tr
         v-for="(n, i) in field"
@@ -38,7 +45,8 @@ export default {
     Square
   },
   data:() => ({
-    isStarted: true,
+    isOver: false,
+    isDraw: false,
     field: 3,
     board: [
       0, 0, 0,
@@ -47,42 +55,62 @@ export default {
     ],
     player: 1
   }),
+  computed: {
+    result() {
+      if (this.isDraw) return '△'
+      return this.player === 1 ? '○' : '✕'
+    },
+    resultClasses() {
+      if (this.isDraw) return 'tryangle'
+      if (this.player === 1) return 'circle'
+      if (this.player === -1) return 'cross'
+      return ''
+    }
+  },
   methods: {
     getId(x, y) {
       return x * this.field + y
     },
     drawMark(id) {
-      if (!this.isStarted || this.board[id] !== 0) {
+      if (this.isOver || this.board[id] !== 0) {
         return
       }
       this.board[id] = this.player
       this.$forceUpdate()
-      this.judge()
-      this.changePlayer()
+      this.isWinJudge() ? this.isOver = true : this.player *= -1
     },
-    changePlayer() {
-      this.player *= -1
-    },
-    judge() {
-      const sumNum = winIds.map(ids => ids.reduce((x, y) => x + this.board[y], 0))
-      const isWin = sumNum.some(num => num === 3)
-      if (isWin) {
-        this.isStarted = false
-        console.log(`${this.player} の勝ち`)
+    isWinJudge() {
+      const sumNums = winIds.map(ids => ids.reduce((x, y) => x + this.board[y], 0))
+      if (this.isDrawJudge(sumNums)) {
+        this.isDraw = true
+        this.isOver = true
         return
       }
+      const isWin = sumNums.some(num => Math.abs(num) === 3)
+      return isWin
+    },
+    isDrawJudge(nums) {
+      return nums.every(num => num !== 0)
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.container {
-  width: 16rem;
-  height: 16rem;
-  display: flex;
-  align-items: center;
-  border: .1rem solid #000;
+.game {
+  &__container {
+    width: 16rem;
+    height: 16rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: .1rem solid #000;
+    position: relative;
+  }
+  &__result {
+    position: absolute;
+    font-size: 16rem;
+  }
 }
 
 table {
