@@ -1,68 +1,72 @@
 <template>
   <div class="container">
-    <div>
-      <logo />
-      <h1 class="title">
-        ultimate-tictactoe
-      </h1>
-      <h2 class="subtitle">
-        My tremendous Nuxt.js project
-      </h2>
-      <div class="links">
-        <a href="https://nuxtjs.org/" target="_blank" class="button--green">
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          class="button--grey"
-        >
-          GitHub
-        </a>
-      </div>
-    </div>
+    <table frame="void">
+      <tr
+        v-for="(n, i) in field"
+        :key="i"
+      >
+        <square
+          v-for="(m, j) in field"
+          :key="j"
+          :state="board[i][j]"
+          @click="drawMark(i, j)"
+        />
+      </tr>
+    </table>
   </div>
 </template>
 
 <script>
-import Logo from '~/components/Logo.vue'
+import Square from '~/components/Square'
 
 export default {
   components: {
-    Logo
+    Square
+  },
+  data:() => ({
+    field: 3,
+    board: [
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0]
+    ],
+    player: 1
+  }),
+  methods: {
+    drawMark(_i, _j) {
+      if (this.board[_i][_j] !== 0) {
+        return
+      }
+      this.board[_i][_j] = this.player
+      this.changePlayer()
+      this.$forceUpdate()
+    },
+    changePlayer() {
+      this.player *= -1
+    }
   }
 }
 </script>
 
-<style>
+<style lang="scss" scoped>
 .container {
-  margin: 0 auto;
-  min-height: 100vh;
+  width: 20rem;
+  height: 20rem;
   display: flex;
-  justify-content: center;
   align-items: center;
+  border: .1rem solid #000;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+td {
+  border: .3rem solid #000;
+  height: 6rem;
+  width: 6rem;
   text-align: center;
-}
-
-.title {
-  font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-
-.links {
-  padding-top: 15px;
+  font-size: 3rem;
+  user-select: none;
 }
 </style>
