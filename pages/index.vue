@@ -8,8 +8,8 @@
         <square
           v-for="(m, j) in field"
           :key="j"
-          :state="board[i][j]"
-          @click="drawMark(i, j)"
+          :state="board[getId(i, j)]"
+          @click="drawMark(getId(i, j))"
         />
       </tr>
     </table>
@@ -21,16 +21,16 @@ import Square from '~/components/Square'
 
 const winIds = [
   // vertical
-  [[0, 0], [1, 0], [2, 0]],
-  [[0, 1], [1, 1], [2, 1]],
-  [[0, 2], [1, 2], [2, 2]],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
   // horizontal
-  [[0, 0], [0, 1], [0, 2]],
-  [[1, 0], [1, 1], [1, 2]],
-  [[2, 0], [2, 1], [2, 2]],
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
   // diagonal
-  [[0, 0], [1, 1], [2, 2]],
-  [[0, 2], [1, 1], [2, 0]]
+  [0, 4, 8],
+  [2, 4, 6]
 ]
 
 export default {
@@ -41,18 +41,21 @@ export default {
     isStarted: true,
     field: 3,
     board: [
-      [0, 0, 0],
-      [0, 0, 0],
-      [0, 0, 0]
+      0, 0, 0,
+      0, 0, 0,
+      0, 0, 0
     ],
     player: 1
   }),
   methods: {
-    drawMark(_i, _j) {
-      if (!this.isStarted || this.board[_i][_j] !== 0) {
+    getId(x, y) {
+      return x * this.field + y
+    },
+    drawMark(id) {
+      if (!this.isStarted || this.board[id] !== 0) {
         return
       }
-      this.board[_i][_j] = this.player
+      this.board[id] = this.player
       this.$forceUpdate()
       this.judge()
       this.changePlayer()
@@ -61,16 +64,13 @@ export default {
       this.player *= -1
     },
     judge() {
-      const boardState = winIds.map(x => x.map(y => this.board[y[0]][y[1]]))
-      boardState.forEach(arr => {
-        const num = arr.reduce((x, y) => x + y)
-        const win = Math.abs(num) === 3 ? true : false
-        if (win) {
-          this.isStarted = false
-          console.log(`${this.player} の勝ち`)
-          return
-        }
-      })
+      const sumNum = winIds.map(ids => ids.reduce((x, y) => x + this.board[y], 0))
+      const isWin = sumNum.some(num => num === 3)
+      if (isWin) {
+        this.isStarted = false
+        console.log(`${this.player} の勝ち`)
+        return
+      }
     }
   }
 }
