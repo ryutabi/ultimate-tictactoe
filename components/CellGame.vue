@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex'
 import Square from '~/components/Square'
 
 const winIds = [
@@ -53,9 +54,10 @@ export default {
       0, 0, 0,
       0, 0, 0
     ],
-    player: 1
+    // player: 1
   }),
   computed: {
+    ...mapState('board', ['player']),
     result() {
       if (this.isDraw) return '△'
       return this.player === 1 ? '○' : '✕'
@@ -68,6 +70,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions('board', ['changePlayer']),
     getId(x, y) {
       return x * this.field + y
     },
@@ -77,7 +80,7 @@ export default {
       }
       this.board[id] = this.player
       this.$forceUpdate()
-      this.isWinJudge() ? this.isOver = true : this.player *= -1
+      this.isWinJudge() ? this.isOver = true : this.changePlayer()
     },
     isWinJudge() {
       const sumNums = winIds.map(ids => ids.reduce((x, y) => x + this.board[y], 0))
@@ -87,6 +90,7 @@ export default {
         return
       }
       const isWin = sumNums.some(num => Math.abs(num) === 3)
+      console.log(sumNums)
       return isWin
     },
     isDrawJudge(nums) {
