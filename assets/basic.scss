@@ -8,6 +8,17 @@ html {
   font-size: 62.5%;
 }
 
+table {
+  border-collapse: collapse;
+  margin: 0 auto;
+}
+
+td {
+  border: .3rem solid #000;
+  text-align: center;
+  user-select: none;
+}
+
 .circle {
   color: #f00;
 }
