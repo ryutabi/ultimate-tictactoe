@@ -54,18 +54,20 @@ export default {
       0, 0, 0,
       0, 0, 0
     ],
-    // player: 1
+    winPlayer: ''
   }),
   computed: {
-    ...mapState('board', ['player']),
+    ...mapState({
+      player: state => state.board.player
+    }),
     result() {
       if (this.isDraw) return '△'
-      return this.player === 1 ? '○' : '✕'
+      return this.winPlayer === 1 ? '○' : '✕'
     },
     resultClasses() {
       if (this.isDraw) return 'tryangle'
-      if (this.player === 1) return 'circle'
-      if (this.player === -1) return 'cross'
+      if (this.winPlayer === 1) return 'circle'
+      if (this.winPlayer === -1) return 'cross'
       return ''
     }
   },
@@ -80,7 +82,7 @@ export default {
       }
       this.board[id] = this.player
       this.$forceUpdate()
-      this.isWinJudge() ? this.isOver = true : this.changePlayer()
+      this.isWinJudge() ? this.gameResult() : this.changePlayer()
     },
     isWinJudge() {
       const sumNums = winIds.map(ids => ids.reduce((x, y) => x + this.board[y], 0))
@@ -95,6 +97,10 @@ export default {
     },
     isDrawJudge(nums) {
       return nums.every(num => num !== 0)
+    },
+    gameResult() {
+      this.winPlayer = this.player
+      this.isOver = true
     }
   }
 }
