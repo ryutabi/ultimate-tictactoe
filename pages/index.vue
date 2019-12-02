@@ -9,7 +9,7 @@
           v-for="(m, j) in field"
           :key="j"
         >
-          <cell-game />
+          <cell-game :cell-id="getId(i, j)" />
         </td>
       </tr>
     </table>
@@ -25,7 +25,12 @@ export default {
   },
   data:() => ({
     field: 3
-  })
+  }),
+  methods: {
+    getId(x, y) {
+      return x * this.field + y
+    }
+  }
 }
 </script>
 
