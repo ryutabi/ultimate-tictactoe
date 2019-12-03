@@ -117,11 +117,15 @@ export default {
       return x * this.field + y
     },
     clickMark(id) {
+      // 初めてのクリック or どこでもクリックできる状態なら
       if (!this.isStarted || this.isClickAbleAnywhere) {
         this.initGame()
       } else if (
+        // セルゲームが終わっている
         this.isOver ||
+        // すでにマークされている
         this.board[id] !== 0 ||
+        // クリックしたセルID と今クリックできるセルIDが違う
         this.cellId !== this.activeCellId
       ) {
         return
@@ -129,15 +133,24 @@ export default {
 
       this.board[id] = this.player
       this.$forceUpdate()
+      // クリックできるセルIDを更新
       this.updateActiveCellId(id)
+      // セルIDがクリックできる状態か確認
       this.checkCellClickAble(id)
       this.isWinJudge() ? this.gameResult() : this.changePlayer()
     },
     isWinJudge() {
       const sumNums = winIds.map(ids => ids.reduce((x, y) => x + this.board[y], 0))
+      // 引き分けだった時
       if (this.isDrawJudge(this.board)) {
         this.isDraw = true
         this.isOver = true
+        // board.js に引き分けを追加
+        const resultData = {
+          cellId: this.cellId,
+          result: 9
+        }
+        this.updateGameBoard(resultData)
         return
       }
       const isWin = sumNums.some(num => Math.abs(num) === 3)
@@ -149,9 +162,11 @@ export default {
     gameResult() {
       this.winPlayer = this.player
       this.isOver = true
+      
+      // board.js に結果を追加
       const resultData = {
         cellId: this.cellId,
-        player: this.player
+        result: this.player
       }
       this.updateGameBoard(resultData)
     }

@@ -28,7 +28,7 @@ export const mutations = {
     }
   },
   UPDATE_GAME_BOARD(state, data) {
-    state.mainBoard[data.cellId] = data.player
+    state.mainBoard[data.cellId] = data.result
   }
 }
 
