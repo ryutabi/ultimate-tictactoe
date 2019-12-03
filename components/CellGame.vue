@@ -63,11 +63,12 @@ export default {
       0, 0, 0,
       0, 0, 0
     ],
-    winPlayer: ''
+    winPlayer: null
   }),
   computed: {
     ...mapState({
       isStarted: state => state.board.isStarted,
+      isClickAbleAnywhere: state => state.board.isClickAbleAnywhere,
       player: state => state.board.player,
       activeCellId: state => state.board.activeCellId
     }),
@@ -106,16 +107,18 @@ export default {
   },
   methods: {
     ...mapActions('board', [
-      'gameStart',
+      'initGame',
       'changePlayer',
-      'updateActiveCellId'
+      'updateActiveCellId',
+      'checkCellClickAble',
+      'updateGameBoard'
     ]),
     getId(x, y) {
       return x * this.field + y
     },
     clickMark(id) {
-      if (!this.isStarted) {
-        this.gameStart()
+      if (!this.isStarted || this.isClickAbleAnywhere) {
+        this.initGame()
       } else if (
         this.isOver ||
         this.board[id] !== 0 ||
@@ -123,15 +126,16 @@ export default {
       ) {
         return
       }
-      
-      this.updateActiveCellId(id)
+
       this.board[id] = this.player
       this.$forceUpdate()
+      this.updateActiveCellId(id)
+      this.checkCellClickAble(id)
       this.isWinJudge() ? this.gameResult() : this.changePlayer()
     },
     isWinJudge() {
       const sumNums = winIds.map(ids => ids.reduce((x, y) => x + this.board[y], 0))
-      if (this.isDrawJudge(sumNums)) {
+      if (this.isDrawJudge(this.board)) {
         this.isDraw = true
         this.isOver = true
         return
@@ -145,6 +149,11 @@ export default {
     gameResult() {
       this.winPlayer = this.player
       this.isOver = true
+      const resultData = {
+        cellId: this.cellId,
+        player: this.player
+      }
+      this.updateGameBoard(resultData)
     }
   }
 }
@@ -162,7 +171,7 @@ export default {
   }
   &__result {
     position: absolute;
-    font-size: 16rem;
+    font-size: 15rem;
   }
 }
 
