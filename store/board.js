@@ -1,13 +1,15 @@
 export const state = () => ({
   isStarted: false,
+  isGameOver: false,
   isClickAbleAnywhere: false,
   mainBoard: [
-    0, 0, 0,
+    0, 1, 1,
     0, 0, 0,
     0, 0, 0
   ],
   player: 1,
-  activeCellId: ''
+  activeCellId: '',
+  gameWinner: ''
 })
 
 export const mutations = {
@@ -27,8 +29,12 @@ export const mutations = {
       state.activeCellId = ''
     }
   },
-  UPDATE_GAME_BOARD(state, data) {
+  UPDATE_MAIN_BOARD(state, data) {
     state.mainBoard[data.cellId] = data.result
+  },
+  GAME_OVER(state, player) {
+    state.isGameOver = true
+    state.gameWinner = player
   }
 }
 
@@ -45,7 +51,10 @@ export const actions = {
   checkCellClickAble({ commit }, id) {
     commit('CHECK_CELL_CLICK_ABLE', id)
   },
-  updateGameBoard({ commit }, data) {
-    commit('UPDATE_GAME_BOARD', data)
+  updateMainBoard({ commit }, data) {
+    commit('UPDATE_MAIN_BOARD', data)
+  },
+  gameOver({ commit }, player) {
+    commit('GAME_OVER', player)
   }
 }

@@ -68,9 +68,11 @@ export default {
   computed: {
     ...mapState({
       isStarted: state => state.board.isStarted,
+      isGameOver: state => state.board.isGameOver,
       isClickAbleAnywhere: state => state.board.isClickAbleAnywhere,
+      mainBoard: state => state.board.mainBoard,
       player: state => state.board.player,
-      activeCellId: state => state.board.activeCellId
+      activeCellId: state => state.board.activeCellId,
     }),
     isActive() {
       return this.cellId === this.activeCellId
@@ -111,12 +113,17 @@ export default {
       'changePlayer',
       'updateActiveCellId',
       'checkCellClickAble',
-      'updateGameBoard'
+      'updateMainBoard',
+      'gameOver'
     ]),
     getId(x, y) {
       return x * this.field + y
     },
     clickMark(id) {
+      // ゲームが終了していたら
+      if (this.isGameOver) {
+        return
+      }
       // 初めてのクリック or どこでもクリックできる状態なら
       if (!this.isStarted || this.isClickAbleAnywhere) {
         this.initGame()
@@ -133,16 +140,29 @@ export default {
 
       this.board[id] = this.player
       this.$forceUpdate()
+
+
+      // 引き分け判定
+      this.drawJudge(this.board)
+      // 勝敗判定
+      if (this.isWinJudge()) {
+        this.cellGameResult()
+      }
+
+      this.changePlayer()
       // クリックできるセルIDを更新
       this.updateActiveCellId(id)
       // セルIDがクリックできる状態か確認
       this.checkCellClickAble(id)
-      this.isWinJudge() ? this.gameResult() : this.changePlayer()
     },
     isWinJudge() {
       const sumNums = winIds.map(ids => ids.reduce((x, y) => x + this.board[y], 0))
-      // 引き分けだった時
-      if (this.isDrawJudge(this.board)) {
+      const isWin = sumNums.some(num => Math.abs(num) === 3)
+      return isWin
+    },
+    drawJudge(nums) {
+      const isDraw = nums.every(num => num !== 0)
+      if (this.isDraw) {
         this.isDraw = true
         this.isOver = true
         // board.js に引き分けを追加
@@ -150,16 +170,11 @@ export default {
           cellId: this.cellId,
           result: 9
         }
-        this.updateGameBoard(resultData)
-        return
+        this.updateMainBoard(resultData)
+        this.ultimateJudge()
       }
-      const isWin = sumNums.some(num => Math.abs(num) === 3)
-      return isWin
     },
-    isDrawJudge(nums) {
-      return nums.every(num => num !== 0)
-    },
-    gameResult() {
+    cellGameResult() {
       this.winPlayer = this.player
       this.isOver = true
       
@@ -168,7 +183,23 @@ export default {
         cellId: this.cellId,
         result: this.player
       }
-      this.updateGameBoard(resultData)
+      this.updateMainBoard(resultData)
+      this.ultimateJudge()
+    },
+    // 最終判定
+    ultimateJudge() {
+      // 引き分け時
+      const isDraw = this.mainBoard.every(num => num !== 0)
+      if (isDraw) {
+        console.log('drawです！')
+      }
+
+      // 勝敗判定
+      const sumNums = winIds.map(ids => ids.reduce((x, y) => x + this.mainBoard[y], 0))
+      const isWin = sumNums.some(num => Math.abs(num) === 3)
+      if (isWin) {
+        this.gameOver(this.player)
+      }
     }
   }
 }

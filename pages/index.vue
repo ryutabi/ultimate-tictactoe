@@ -13,10 +13,17 @@
         </td>
       </tr>
     </table>
+    <p
+      v-if="isGameOver"
+      class="result"
+    >
+      {{ result }}
+    </p>
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import CellGame from '~/components/CellGame'
 
 export default {
@@ -26,6 +33,15 @@ export default {
   data:() => ({
     field: 3
   }),
+  computed: {
+    ...mapState({
+      isGameOver: state => state.board.isGameOver,
+      gameWinner: state => state.board.gameWinner
+    }),
+    result() {
+      return `${this.gameWinner}の勝ち`
+    }
+  },
   methods: {
     getId(x, y) {
       return x * this.field + y
