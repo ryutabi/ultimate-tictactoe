@@ -34,6 +34,7 @@ export const mutations = {
   },
   GAME_OVER(state, player) {
     state.isGameOver = true
+    state.activeCellId = ''
     state.gameWinner = player
   }
 }
