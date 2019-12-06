@@ -3,7 +3,7 @@ export const state = () => ({
   isGameOver: false,
   isClickAbleAnywhere: false,
   mainBoard: [
-    0, 1, 1,
+    0, 0, 0,
     0, 0, 0,
     0, 0, 0
   ],

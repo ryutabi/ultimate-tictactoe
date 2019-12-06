@@ -28,21 +28,8 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
+import { isWinJudge, isDrawJudge } from '~/assets/game'
 import Square from '~/components/Square'
-
-const winIds = [
-  // vertical
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  // horizontal
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  // diagonal
-  [0, 4, 8],
-  [2, 4, 6]
-]
 
 export default {
   components: {
@@ -141,28 +128,23 @@ export default {
       this.board[id] = this.player
       this.$forceUpdate()
 
-
-      // 引き分け判定
-      this.drawJudge(this.board)
-      // 勝敗判定
-      if (this.isWinJudge()) {
-        this.cellGameResult()
-      }
-
-      this.changePlayer()
       // クリックできるセルIDを更新
       this.updateActiveCellId(id)
       // セルIDがクリックできる状態か確認
       this.checkCellClickAble(id)
+
+      // 引き分け判定
+      this.drawJudge()
+      // 勝敗判定
+      if (isWinJudge(this.board)) {
+        this.cellGameResult()
+      }
+
+      // プレイヤーをチェンジ
+      this.changePlayer()
     },
-    isWinJudge() {
-      const sumNums = winIds.map(ids => ids.reduce((x, y) => x + this.board[y], 0))
-      const isWin = sumNums.some(num => Math.abs(num) === 3)
-      return isWin
-    },
-    drawJudge(nums) {
-      const isDraw = nums.every(num => num !== 0)
-      if (this.isDraw) {
+    drawJudge() {
+      if (isDrawJudge(this.board)) {
         this.isDraw = true
         this.isOver = true
         // board.js に引き分けを追加
@@ -171,7 +153,7 @@ export default {
           result: 9
         }
         this.updateMainBoard(resultData)
-        this.ultimateJudge()
+        this.ultimateJudgment()
       }
     },
     cellGameResult() {
@@ -184,21 +166,19 @@ export default {
         result: this.player
       }
       this.updateMainBoard(resultData)
-      this.ultimateJudge()
+      this.ultimateJudgment()
     },
     // 最終判定
-    ultimateJudge() {
+    ultimateJudgment() {
       // 引き分け時
-      const isDraw = this.mainBoard.every(num => num !== 0)
-      if (isDraw) {
+      if (isDrawJudge(this.mainBoard)) {
         console.log('drawです！')
       }
 
       // 勝敗判定
-      const sumNums = winIds.map(ids => ids.reduce((x, y) => x + this.mainBoard[y], 0))
-      const isWin = sumNums.some(num => Math.abs(num) === 3)
-      if (isWin) {
+      if (isWinJudge(this.mainBoard)) {
         this.gameOver(this.player)
+        console.log('Game Over')
       }
     }
   }
