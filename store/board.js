@@ -24,7 +24,7 @@ export const mutations = {
     state.activeCellId = id
   },
   CHECK_CELL_CLICK_ABLE(state, id) {
-    if (state.mainBoard[id] !== 0) {
+    if (state.mainBoard[id] !== 0 || state.isGameOver) {
       state.isClickAbleAnywhere = true
       state.activeCellId = ''
     }
@@ -34,7 +34,6 @@ export const mutations = {
   },
   GAME_OVER(state, player) {
     state.isGameOver = true
-    state.activeCellId = ''
     state.gameWinner = player
   }
 }

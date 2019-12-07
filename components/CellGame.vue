@@ -8,7 +8,7 @@
       class="cell_game__result"
       :class="resultClasses"
     >
-      {{ result }}
+      {{ cellGameResult }}
     </div>
     <table frame="void">
       <tr
@@ -64,34 +64,22 @@ export default {
     isActive() {
       return this.cellId === this.activeCellId
     },
-    result() {
-      if (this.isDraw) return '△'
-      return this.winPlayer === 1 ? '○' : '✕'
+    cellGameResult() {
+      return this.isDraw ? '△' :
+             this.winPlayer === 1 ? '○' :
+             this.winPlayer === -1 ? '✕' :
+             ''
     },
     resultClasses() {
-      if (this.isDraw) {
-        return 'tryangle'
-      }
-      if (this.winPlayer === 1) {
-        return 'circle'
-      }
-      if (this.winPlayer === -1) {
-        return 'cross'
-      }
-      return ''
+      return this.isDraw ? 'tryangle' :
+             this.winPlayer === 1 ? 'circle' :
+             this.winPlayer === -1 ? 'cross' :
+             ''
     },
     activeClasses() {
-      if (this.player === 1) {
-        return {
-        'active--circle': this.isActive
-        }
-      }
-      if (this.player === -1) {
-        return {
-          'active--cross': this.isActive
-        }
-      }
-      return ''
+      return this.player === 1 ? {'active--circle': this.isActive} :
+             this.player === -1 ? {'active--cross': this.isActive} :
+             ''
     }
   },
   methods: {
@@ -128,17 +116,17 @@ export default {
       this.board[id] = this.player
       this.$forceUpdate()
 
-      // クリックできるセルIDを更新
-      this.updateActiveCellId(id)
-      // セルIDがクリックできる状態か確認
-      this.checkCellClickAble(id)
-
       // 引き分け判定
       this.drawJudge()
       // 勝敗判定
       if (isWinJudge(this.board)) {
-        this.cellGameResult()
+        this.cellGameJudgment()
       }
+
+      // クリックできるセルIDを更新
+      this.updateActiveCellId(id)
+      // セルIDがクリックできる状態か確認
+      this.checkCellClickAble(id)
 
       // プレイヤーをチェンジ
       this.changePlayer()
@@ -156,7 +144,7 @@ export default {
         this.ultimateJudgment()
       }
     },
-    cellGameResult() {
+    cellGameJudgment() {
       this.winPlayer = this.player
       this.isOver = true
       
@@ -202,17 +190,30 @@ export default {
 }
 
 td {
-  border: .1rem solid #000;
+  border: .1rem solid #333;
   height: 5rem;
   width: 5rem;
   font-size: 3rem;
 }
 
+.circle {
+  color: #ee0011;
+}
+
+.cross {
+  color: #0010ed;
+}
+
+.tryangle {
+  color: #10ed00;
+}
+
 .active--circle {
-  background-color: #ffbfcb;
+  background-color: rgba(238, 0, 17, .2);
 }
 
 .active--cross {
-  background-color: #bffff3;
+  background-color: rgba(0, 17, 238, .2);
 }
+
 </style>
