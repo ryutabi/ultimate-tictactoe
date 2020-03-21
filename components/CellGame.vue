@@ -8,7 +8,7 @@
       class="cell_game__result"
       :class="resultClasses"
     >
-      {{ result }}
+      {{ cellGameResult }}
     </div>
     <table frame="void">
       <tr
@@ -28,21 +28,8 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
+import { isWinJudge, isDrawJudge } from '~/assets/game'
 import Square from '~/components/Square'
-
-const winIds = [
-  // vertical
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  // horizontal
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  // diagonal
-  [0, 4, 8],
-  [2, 4, 6]
-]
 
 export default {
   components: {
@@ -68,41 +55,31 @@ export default {
   computed: {
     ...mapState({
       isStarted: state => state.board.isStarted,
+      isGameOver: state => state.board.isGameOver,
       isClickAbleAnywhere: state => state.board.isClickAbleAnywhere,
+      mainBoard: state => state.board.mainBoard,
       player: state => state.board.player,
-      activeCellId: state => state.board.activeCellId
+      activeCellId: state => state.board.activeCellId,
     }),
     isActive() {
       return this.cellId === this.activeCellId
     },
-    result() {
-      if (this.isDraw) return '△'
-      return this.winPlayer === 1 ? '○' : '✕'
+    cellGameResult() {
+      return this.isDraw ? '△' :
+             this.winPlayer === 1 ? '○' :
+             this.winPlayer === -1 ? '✕' :
+             ''
     },
     resultClasses() {
-      if (this.isDraw) {
-        return 'tryangle'
-      }
-      if (this.winPlayer === 1) {
-        return 'circle'
-      }
-      if (this.winPlayer === -1) {
-        return 'cross'
-      }
-      return ''
+      return this.isDraw ? 'tryangle' :
+             this.winPlayer === 1 ? 'circle' :
+             this.winPlayer === -1 ? 'cross' :
+             ''
     },
     activeClasses() {
-      if (this.player === 1) {
-        return {
-        'active--circle': this.isActive
-        }
-      }
-      if (this.player === -1) {
-        return {
-          'active--cross': this.isActive
-        }
-      }
-      return ''
+      return this.player === 1 ? {'active--circle': this.isActive} :
+             this.player === -1 ? {'active--cross': this.isActive} :
+             ''
     }
   },
   methods: {
@@ -111,12 +88,17 @@ export default {
       'changePlayer',
       'updateActiveCellId',
       'checkCellClickAble',
-      'updateGameBoard'
+      'updateMainBoard',
+      'gameOver'
     ]),
     getId(x, y) {
       return x * this.field + y
     },
     clickMark(id) {
+      // ゲームが終了していたら
+      if (this.isGameOver) {
+        return
+      }
       // 初めてのクリック or どこでもクリックできる状態なら
       if (!this.isStarted || this.isClickAbleAnywhere) {
         this.initGame()
@@ -133,16 +115,24 @@ export default {
 
       this.board[id] = this.player
       this.$forceUpdate()
+
+      // 引き分け判定
+      this.drawJudge()
+      // 勝敗判定
+      if (isWinJudge(this.board)) {
+        this.cellGameJudgment()
+      }
+
       // クリックできるセルIDを更新
       this.updateActiveCellId(id)
       // セルIDがクリックできる状態か確認
       this.checkCellClickAble(id)
-      this.isWinJudge() ? this.gameResult() : this.changePlayer()
+
+      // プレイヤーをチェンジ
+      this.changePlayer()
     },
-    isWinJudge() {
-      const sumNums = winIds.map(ids => ids.reduce((x, y) => x + this.board[y], 0))
-      // 引き分けだった時
-      if (this.isDrawJudge(this.board)) {
+    drawJudge() {
+      if (isDrawJudge(this.board)) {
         this.isDraw = true
         this.isOver = true
         // board.js に引き分けを追加
@@ -150,16 +140,11 @@ export default {
           cellId: this.cellId,
           result: 9
         }
-        this.updateGameBoard(resultData)
-        return
+        this.updateMainBoard(resultData)
+        this.ultimateJudgment()
       }
-      const isWin = sumNums.some(num => Math.abs(num) === 3)
-      return isWin
     },
-    isDrawJudge(nums) {
-      return nums.every(num => num !== 0)
-    },
-    gameResult() {
+    cellGameJudgment() {
       this.winPlayer = this.player
       this.isOver = true
       
@@ -168,7 +153,21 @@ export default {
         cellId: this.cellId,
         result: this.player
       }
-      this.updateGameBoard(resultData)
+      this.updateMainBoard(resultData)
+      this.ultimateJudgment()
+    },
+    // 最終判定
+    ultimateJudgment() {
+      // 引き分け時
+      if (isDrawJudge(this.mainBoard)) {
+        console.log('drawです！')
+      }
+
+      // 勝敗判定
+      if (isWinJudge(this.mainBoard)) {
+        this.gameOver(this.player)
+        console.log('Game Over')
+      }
     }
   }
 }
@@ -191,17 +190,30 @@ export default {
 }
 
 td {
-  border: .1rem solid #000;
+  border: .1rem solid #333;
   height: 5rem;
   width: 5rem;
   font-size: 3rem;
 }
 
+.circle {
+  color: #ee0011;
+}
+
+.cross {
+  color: #0010ed;
+}
+
+.tryangle {
+  color: #10ed00;
+}
+
 .active--circle {
-  background-color: #ffbfcb;
+  background-color: rgba(238, 0, 17, .2);
 }
 
 .active--cross {
-  background-color: #bffff3;
+  background-color: rgba(0, 17, 238, .2);
 }
+
 </style>
